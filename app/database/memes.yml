@@ -1,0 +1,8 @@
+columns:
+  title: string
+  description: text
+  image_path: string
+  category: string
+  embedding:
+    type: text
+    nullable: true
