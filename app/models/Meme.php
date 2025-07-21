@@ -17,4 +17,9 @@ class Meme extends Model
     {
         return $this->hasMany(\App\Models\Like::class);
     }
+
+    public function captions()
+    {
+        return $this->hasMany(\App\Models\Caption::class);
+    }
 }

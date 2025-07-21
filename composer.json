@@ -17,7 +17,9 @@
         "leafs/logger": "^4.0",
         "leafs/vite": "^0.3.0",
         "intervention/image": "^3.11",
-        "guzzlehttp/guzzle": "^7.9"
+        "guzzlehttp/guzzle": "^7.9",
+        "leafs/fs": "^4.2",
+        "illuminate/pagination": "^12.20"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24"

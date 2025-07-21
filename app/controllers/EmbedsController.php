@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\Meme;
 use GuzzleHttp\Client;
+use App\Models\Caption;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class EmbedsController extends Controller
 {
@@ -406,6 +408,12 @@ class EmbedsController extends Controller
 
         $canvas->save($outputPath);
 
+        Caption::create([
+            'meme_id' => $bestMeme->id,
+            'caption' => $caption
+        ]);
+
+
         response()->json([
             'image_url' => '/generated/' . basename($outputPath),
             'caption' => $caption,
@@ -415,7 +423,34 @@ class EmbedsController extends Controller
     }
 
 
+    public function showMeme($id)
+    {
+        $meme = Meme::findOrFail($id);
 
+        $perPage = 12;
+        $currentPage = request()->get('page', 1);
+
+        $allCaptions = $meme->captions()->get()->toArray();
+        $total = count($allCaptions);
+        $offset = ($currentPage - 1) * $perPage;
+        $items = array_slice($allCaptions, $offset, $perPage);
+
+        $paginator = new LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => "/meme/$id",
+                'query' => request()->query(),
+            ]
+        );
+
+        return render('meme', [
+            'meme' => $meme,
+            'captions' => $paginator,
+        ]);
+    }
 
 
     private function getPromptEmbedding($prompt)

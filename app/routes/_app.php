@@ -14,3 +14,7 @@ app()->post('/memes/find-match', 'EmbedsController@matchPrompt');
 app()->post('/memes/generate', 'EmbedsController@generateFinalMeme');
 
 app()->post('/telegram/webhook', 'TelegramsController@webhook');
+
+app()->get('/gallery', 'GalleriesController@showGallery');
+
+app()->get('/meme/{id}', 'EmbedsController@showMeme');
