@@ -74,7 +74,7 @@ app()->post('/upload', ['middleware' => 'auth.required', function () {
         $meme = new \App\Models\Meme();
         $meme->title = $filename;
         $meme->category = "";
-        $meme->image_path = "assets/img/$filename";
+        $meme->image_path = "/assets/img/$filename";
         $meme->description = $desc;
         $meme->save();
 
