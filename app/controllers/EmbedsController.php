@@ -178,6 +178,9 @@ class EmbedsController extends Controller
 
         ];
 
+
+
+
         foreach ($memes as $meme) {
             \App\Models\Meme::create($meme);
         }

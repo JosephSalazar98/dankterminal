@@ -64,4 +64,6 @@ if (php_sapi_name() === 'cli-server') {
 | This line brings in all your routes and starts your application
 |
 */
+
+
 \Leaf\Core::runApplication();
