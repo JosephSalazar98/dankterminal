@@ -33,16 +33,17 @@ app()->get('/login', ['middleware' => 'auth.guest', function () {
 // Proceso de login
 app()->post('/login', function () {
     $success = auth()->login([
-        'email' => request('email'),
-        'password' => request('password')
+        'email' => request()->get('email'),
+        'password' => request()->get('password')
     ]);
 
     if ($success) {
         response()->redirect('/dashboard');
     } else {
-        echo "Login incorrecto: " . json_encode(auth()->errors());
+        echo "Incorrect: " . json_encode(auth()->errors());
     }
 });
+
 
 // Logout
 app()->get('/logout', function () {
