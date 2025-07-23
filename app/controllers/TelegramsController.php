@@ -114,7 +114,7 @@ class TelegramsController
             if (!$response || !isset($response['image_url'], $response['caption'], $response['meme_id'])) {
                 file_get_contents("$API_URL/sendMessage?" . http_build_query([
                     'chat_id' => $chat_id,
-                    'text' => "Error generating creative meme."
+                    'text' => "Creative meme failed: " . json_encode($response)
                 ]));
                 return;
             }
@@ -164,7 +164,19 @@ class TelegramsController
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
         $result = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            return ['error' => 'Curl error: ' . $error];
+        }
+
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
+        if ($status !== 200) {
+            return ['error' => 'HTTP status ' . $status];
+        }
 
         return json_decode($result, true);
     }
