@@ -336,6 +336,28 @@ EOM;
         return trim($data['choices'][0]['message']['content'] ?? '');
     }
 
+    public function wrapText($text, $fontPath, $fontSize, $maxWidth)
+    {
+        $words = explode(' ', $text);
+        $lines = [];
+        $currentLine = '';
+
+        foreach ($words as $word) {
+            $testLine = trim($currentLine . ' ' . $word);
+            $box = imagettfbbox($fontSize, 0, $fontPath, $testLine);
+            $lineWidth = abs($box[2] - $box[0]);
+
+            if ($lineWidth < $maxWidth) {
+                $currentLine = $testLine;
+            } else {
+                if ($currentLine) $lines[] = $currentLine;
+                $currentLine = $word;
+            }
+        }
+        if ($currentLine) $lines[] = $currentLine;
+        return $lines;
+    }
+
     public function generateFinalMeme()
     {
         $prompt = request()->get('prompt');
@@ -377,29 +399,9 @@ EOM;
         $fontSize = max(20, min(intval($original->height() * 0.06), 60));
         $maxWidth = intval($original->width() * 1);
 
-        function wrapText($text, $fontPath, $fontSize, $maxWidth)
-        {
-            $words = explode(' ', $text);
-            $lines = [];
-            $currentLine = '';
 
-            foreach ($words as $word) {
-                $testLine = trim($currentLine . ' ' . $word);
-                $box = imagettfbbox($fontSize, 0, $fontPath, $testLine);
-                $lineWidth = abs($box[2] - $box[0]);
 
-                if ($lineWidth < $maxWidth) {
-                    $currentLine = $testLine;
-                } else {
-                    if ($currentLine) $lines[] = $currentLine;
-                    $currentLine = $word;
-                }
-            }
-            if ($currentLine) $lines[] = $currentLine;
-            return $lines;
-        }
-
-        $lines = wrapText($caption, $fontPath, $fontSize, $maxWidth);
+        $lines = $this->wrapText($caption, $fontPath, $fontSize, $maxWidth);
         $lineHeight = $fontSize + 10;
         $paddingTop = 20;
         $paddingBottom = 20;
@@ -436,6 +438,64 @@ EOM;
             'score' => $bestScore
         ]);
     }
+
+    public function generateFromRandom()
+    {
+        $meme = Meme::inRandomOrder()->whereNotNull('embedding')->first();
+
+        if (!$meme) {
+            response()->json(['error' => 'No memes with embeddings'], 404);
+            return;
+        }
+
+        $caption = $this->generateCaption($meme->description, $meme->description);
+
+        $imagePath = __DIR__ . '/../../public' . $meme->image_path;
+        $outputPath = __DIR__ . '/../../public/generated/final_' . uniqid() . '.png';
+
+        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        $original = $manager->read($imagePath);
+
+        $fontPath = __DIR__ . '/../fonts/Anton-Regular.ttf';
+        $fontSize = max(20, min(intval($original->height() * 0.06), 60));
+        $maxWidth = intval($original->width() * 1);
+
+        $lines = $this->wrapText($caption, $fontPath, $fontSize, $maxWidth);
+        $lineHeight = $fontSize + 10;
+        $paddingTop = 20;
+        $paddingBottom = 20;
+        $textAreaHeight = count($lines) * $lineHeight + $paddingTop + $paddingBottom;
+
+        $canvas = $manager->create($original->width(), $original->height() + $textAreaHeight);
+        $canvas->fill('#ffffff');
+        $canvas->place($original, 'top-left', 0, $textAreaHeight);
+
+        foreach ($lines as $i => $line) {
+            $y = $paddingTop + $i * $lineHeight;
+
+            $canvas->text($line, $canvas->width() / 2, $y, function ($font) use ($fontPath, $fontSize) {
+                $font->file($fontPath);
+                $font->size($fontSize);
+                $font->color('#000000');
+                $font->align('center');
+                $font->valign('top');
+            });
+        }
+
+        $canvas->save($outputPath);
+
+        Caption::create([
+            'meme_id' => $meme->id,
+            'caption' => $caption
+        ]);
+
+        response()->json([
+            'image_url' => '/generated/' . basename($outputPath),
+            'caption' => $caption,
+            'meme_id' => $meme->id
+        ]);
+    }
+
 
 
     public function showMeme($id)

@@ -18,7 +18,7 @@ class TelegramsController
         // Manejar votos
         if (isset($update['callback_query'])) {
             $callback = $update['callback_query'];
-            $data = $callback['data']; // e.g. "like:12"
+            $data = $callback['data'];
             $chat_id = $callback['message']['chat']['id'];
             $message_id = $callback['message']['message_id'];
 
@@ -30,7 +30,7 @@ class TelegramsController
                     ->first();
 
                 if ($existing) {
-                    $existing->delete(); // quitar voto
+                    $existing->delete();
                 } else {
                     Like::create([
                         'telegram_user_id' => $chat_id,
@@ -57,53 +57,88 @@ class TelegramsController
             }
         }
 
-        // Comando /generate
+        // Comando
         if (!isset($update['message']['text'])) return;
 
         $chat_id = $update['message']['chat']['id'];
         $text = trim($update['message']['text']);
 
-        if (stripos($text, '/generate') !== 0) return;
+        // /generate
+        if (stripos($text, '/generate') === 0) {
+            $prompt = trim(substr($text, strlen('/generate')));
 
-        $prompt = trim(substr($text, strlen('/generate')));
+            if ($prompt === '') {
+                file_get_contents("$API_URL/sendMessage?" . http_build_query([
+                    'chat_id' => $chat_id,
+                    'text' => "Usage: /generate your meme prompt"
+                ]));
+                return;
+            }
 
-        if ($prompt === '') {
-            file_get_contents("$API_URL/sendMessage?" . http_build_query([
+            $response = $this->callGenerateEndpoint($prompt);
+
+            if (!$response || !isset($response['image_url'], $response['caption'], $response['meme_id'])) {
+                file_get_contents("$API_URL/sendMessage?" . http_build_query([
+                    'chat_id' => $chat_id,
+                    'text' => "Error generating meme."
+                ]));
+                return;
+            }
+
+            file_get_contents($API_URL . '/sendPhoto?' . http_build_query([
                 'chat_id' => $chat_id,
-                'text' => "Usage: /generate your meme prompt"
+                'photo' => 'https://dankterminal.xyz' . $response['image_url'],
+                'caption' => $response['caption'],
+                'reply_markup' => json_encode([
+                    'inline_keyboard' => [[
+                        [
+                            'text' => "👍 0",
+                            'callback_data' => "like:" . $response['meme_id']
+                        ]
+                    ]]
+                ])
             ]));
+
+            $localPath = __DIR__ . '/../../public' . $response['image_url'];
+            if (file_exists($localPath)) {
+                unlink($localPath);
+            }
+
             return;
         }
 
-        $response = $this->callGenerateEndpoint($prompt);
+        // /creative
+        if (stripos($text, '/creative') === 0) {
+            $response = $this->callCreativeEndpoint();
 
-        if (!$response || !isset($response['image_url'], $response['caption'], $response['meme_id'])) {
-            file_get_contents("$API_URL/sendMessage?" . http_build_query([
+            if (!$response || !isset($response['image_url'], $response['caption'], $response['meme_id'])) {
+                file_get_contents("$API_URL/sendMessage?" . http_build_query([
+                    'chat_id' => $chat_id,
+                    'text' => "Error generating creative meme."
+                ]));
+                return;
+            }
+
+            file_get_contents($API_URL . '/sendPhoto?' . http_build_query([
                 'chat_id' => $chat_id,
-                'text' => "Error generating meme."
+                'photo' => 'https://dankterminal.xyz' . $response['image_url'],
+                'caption' => $response['caption'],
+                'reply_markup' => json_encode([
+                    'inline_keyboard' => [[
+                        [
+                            'text' => "👍 0",
+                            'callback_data' => "like:" . $response['meme_id']
+                        ]
+                    ]]
+                ])
             ]));
+
+            $localPath = __DIR__ . '/../../public' . $response['image_url'];
+            if (file_exists($localPath)) {
+                unlink($localPath);
+            }
+
             return;
-        }
-
-        // Enviar meme con botón
-        file_get_contents($API_URL . '/sendPhoto?' . http_build_query([
-            'chat_id' => $chat_id,
-            'photo' => 'https://dankterminal.xyz' . $response['image_url'],
-            'caption' => $response['caption'],
-            'reply_markup' => json_encode([
-                'inline_keyboard' => [[
-                    [
-                        'text' => "👍 0",
-                        'callback_data' => "like:" . $response['meme_id']
-                    ]
-                ]]
-            ])
-        ]));
-
-        // limpiar imagen
-        $localPath = __DIR__ . '/../../public' . $response['image_url'];
-        if (file_exists($localPath)) {
-            unlink($localPath);
         }
     }
 
@@ -113,6 +148,18 @@ class TelegramsController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['prompt' => $prompt]));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        return json_decode($result, true);
+    }
+
+    private function callCreativeEndpoint()
+    {
+        $ch = curl_init('https://dankterminal.xyz/memes/creative');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
         $result = curl_exec($ch);

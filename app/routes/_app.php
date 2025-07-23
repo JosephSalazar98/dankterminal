@@ -104,3 +104,5 @@ app()->post('/upload', ['middleware' => 'auth.required', function () {
         echo "There was an error.";
     }
 }]);
+
+app()->post('/memes/generate-random', 'EmbedsController@generateFromRandom');
