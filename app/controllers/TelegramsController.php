@@ -160,6 +160,7 @@ class TelegramsController
     {
         $ch = curl_init('https://dankterminal.xyz/memes/creative');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
         $result = curl_exec($ch);
