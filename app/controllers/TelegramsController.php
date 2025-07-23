@@ -57,7 +57,7 @@ class TelegramsController
             }
         }
 
-        // Comando
+        // Comandos
         if (!isset($update['message']['text'])) return;
 
         $chat_id = $update['message']['chat']['id'];
@@ -107,9 +107,12 @@ class TelegramsController
             return;
         }
 
-        // /creative
+        // /creative [image_id]
         if (stripos($text, '/creative') === 0) {
-            $response = $this->callCreativeEndpoint();
+            $parts = explode(' ', $text);
+            $imageId = $parts[1] ?? null;
+
+            $response = $this->callCreativeEndpoint($imageId);
 
             if (!$response || !isset($response['image_url'], $response['caption'], $response['meme_id'])) {
                 file_get_contents("$API_URL/sendMessage?" . http_build_query([
@@ -118,7 +121,6 @@ class TelegramsController
                 ]));
                 return;
             }
-
 
             file_get_contents($API_URL . '/sendPhoto?' . http_build_query([
                 'chat_id' => $chat_id,
@@ -157,11 +159,14 @@ class TelegramsController
         return json_decode($result, true);
     }
 
-    private function callCreativeEndpoint()
+    private function callCreativeEndpoint($imageId = null)
     {
         $ch = curl_init('https://dankterminal.xyz/memes/creative');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
+        if ($imageId) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['image_id' => $imageId]));
+        }
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
         $result = curl_exec($ch);

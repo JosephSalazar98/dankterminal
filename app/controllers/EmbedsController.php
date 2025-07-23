@@ -549,4 +549,80 @@ EOM;
         $data = json_decode($response->getBody(), true);
         return $data['data'][0]['embedding'];
     }
+
+    public function generateCreative()
+    {
+        $imageId = request()->input('image_id');
+
+        if (is_array($imageId)) {
+            $imageId = array_filter($imageId);
+            $imageId = reset($imageId); // get first non-empty value
+        }
+
+        if (!empty($imageId)) {
+            return $this->generateFromImageId($imageId);
+        } else {
+            return $this->generateFromRandom();
+        }
+    }
+
+
+    public function generateFromImageId($imageId)
+    {
+        // in case there's a duplicated title
+        $meme = Meme::find($imageId);
+
+        if (!$meme || !$meme->embedding) {
+            response()->json(['error' => 'Meme not found or missing embedding'], 404);
+            return;
+        }
+
+
+        $caption = $this->generateCaption($meme->description, $meme->description);
+
+        $imagePath = __DIR__ . '/../../public' . $meme->image_path;
+        $outputPath = __DIR__ . '/../../public/generated/final_' . uniqid() . '.png';
+
+        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        $original = $manager->read($imagePath);
+
+        $fontPath = __DIR__ . '/../fonts/Anton-Regular.ttf';
+        $fontSize = max(20, min(intval($original->height() * 0.06), 60));
+        $maxWidth = intval($original->width() * 1);
+
+        $lines = $this->wrapText($caption, $fontPath, $fontSize, $maxWidth);
+        $lineHeight = $fontSize + 10;
+        $paddingTop = 20;
+        $paddingBottom = 20;
+        $textAreaHeight = count($lines) * $lineHeight + $paddingTop + $paddingBottom;
+
+        $canvas = $manager->create($original->width(), $original->height() + $textAreaHeight);
+        $canvas->fill('#ffffff');
+        $canvas->place($original, 'top-left', 0, $textAreaHeight);
+
+        foreach ($lines as $i => $line) {
+            $y = $paddingTop + $i * $lineHeight;
+
+            $canvas->text($line, $canvas->width() / 2, $y, function ($font) use ($fontPath, $fontSize) {
+                $font->file($fontPath);
+                $font->size($fontSize);
+                $font->color('#000000');
+                $font->align('center');
+                $font->valign('top');
+            });
+        }
+
+        $canvas->save($outputPath);
+
+        Caption::create([
+            'meme_id' => $meme->id,
+            'caption' => $caption
+        ]);
+
+        response()->json([
+            'image_url' => '/generated/' . basename($outputPath),
+            'caption' => $caption,
+            'meme_id' => $meme->id
+        ]);
+    }
 }

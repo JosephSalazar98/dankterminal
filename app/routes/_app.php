@@ -105,4 +105,4 @@ app()->post('/upload', ['middleware' => 'auth.required', function () {
     }
 }]);
 
-app()->post('/memes/creative', 'EmbedsController@generateFromRandom');
+app()->post('/memes/creative', 'EmbedsController@generateCreative');
