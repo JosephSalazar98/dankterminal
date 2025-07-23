@@ -114,10 +114,11 @@ class TelegramsController
             if (!$response || !isset($response['image_url'], $response['caption'], $response['meme_id'])) {
                 file_get_contents("$API_URL/sendMessage?" . http_build_query([
                     'chat_id' => $chat_id,
-                    'text' => "Creative meme failed: " . json_encode($response)
+                    'text' => "Couldn't create meme at the moment. Try again later."
                 ]));
                 return;
             }
+
 
             file_get_contents($API_URL . '/sendPhoto?' . http_build_query([
                 'chat_id' => $chat_id,
