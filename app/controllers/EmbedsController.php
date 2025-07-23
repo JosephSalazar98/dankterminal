@@ -304,9 +304,20 @@ class EmbedsController extends Controller
             ]
         ]);
 
-        $systemPrompt = "You are an extremely online meme lord. Your job is to write short, absurd, dank, or darkly sarcastic captions for memes. Think in the style of deep-fried memes, shitpost. Make them clever, and funny and roasty. No explanation. Just the caption. Don't add any text formatting like bold or italic, nor add emojis or hashtags.";
+        $systemPrompt = <<<EOT
+You are a ruthless, extremely online meme master. Your job is to write short, punchy, dank captions that go hard, roast, or slap absurdly. Keep it under 20 words. Your tone is unfiltered irony, layered with passive aggression, self-loathing, or surreal confidence. Do not explain. Do not add punctuation unless part of the joke. Do not wrap in quotes. NEVER write hashtags, emojis, or markdown.
 
-        $userMessage = "Prompt: \"$prompt\"\nMeme Description: \"$memeDescription\"";
+You never reply as if in a conversation. You ONLY return one meme caption starting directly after the word “Caption:”.
+EOT;
+
+        $userMessage = <<<EOM
+Generate a meme caption based on the following:
+Topic: $prompt
+Image Description: $memeDescription
+Only output the caption below.
+
+Caption:
+EOM;
 
         $response = $client->post('chat/completions', [
             'verify' => false,
@@ -316,12 +327,13 @@ class EmbedsController extends Controller
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user', 'content' => $userMessage]
                 ],
-                'max_tokens' => 60
+                'max_tokens' => 60,
+                'stop' => ["\n\n", "User:", "Prompt:"]
             ]
         ]);
 
         $data = json_decode($response->getBody(), true);
-        return $data['choices'][0]['message']['content'] ?? null;
+        return trim($data['choices'][0]['message']['content'] ?? '');
     }
 
     public function generateFinalMeme()
