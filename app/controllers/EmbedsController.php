@@ -192,7 +192,7 @@ class EmbedsController extends Controller
             $imageId = reset($imageId);
         }
 
-        if (!empty($imageId)) {
+        if (!empty($imageId) && is_numeric($imageId)) {
             return $this->generateFromImageId($imageId);
         } else {
             return $this->generateFromRandom();

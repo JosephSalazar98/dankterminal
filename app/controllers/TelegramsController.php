@@ -88,8 +88,12 @@ class TelegramsController extends Controller
 
             // /creative
             if (stripos($text, '/creative') === 0) {
-                $parts = explode(' ', $text);
+                $parts = preg_split('/\s+/', $text);
                 $imageId = $parts[1] ?? null;
+
+                if ($imageId !== null && !ctype_digit($imageId)) {
+                    $imageId = null;
+                }
 
                 $response = $telegram->callCreativeEndpoint($imageId);
                 file_put_contents('tg.log', "\n\nCREATIVE RESPONSE:\n" . json_encode($response, JSON_PRETTY_PRINT) . "\n", FILE_APPEND);
