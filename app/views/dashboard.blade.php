@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="memeGenerator()">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -11,14 +11,13 @@
 </head>
 
 <body>
-
-
-    <form method="POST" action="/login">
-        <input name="email" type="text" placeholder="email" /><br>
-        <input name="password" type="password" placeholder="password" /><br>
-        <button type="submit">Login</button>
+    <h2>Upload new meme</h2>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="image" required /><br>
+        <textarea name="description" placeholder="description" required></textarea><br>
+        <button>Upload</button>
     </form>
-
+    <a href="/logout">Log out</a>
 </body>
 
 </html>
