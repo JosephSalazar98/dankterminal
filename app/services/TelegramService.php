@@ -51,7 +51,7 @@ class TelegramService
     {
         file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendPhoto] chat_id: $chatId, photo: $imageUrl\ncaption: $caption\n", FILE_APPEND);
 
-        $response = $this->client->post('sendPhoto', [
+        $response = $this->client->get('sendPhoto', [
             'json' => [
                 'chat_id' => $chatId,
                 'photo' => $imageUrl,
