@@ -9,11 +9,13 @@ class TelegramService
 {
     private string $apiUrl;
     private Client $client;
+    private Client $appClient;
 
     public function __construct()
     {
         $token = _env('TELEGRAM_TOKEN');
-        $this->apiUrl = "https://api.telegram.org/bot{$token}";
+        // Trailing slash ensures request paths append after /bot{token}
+        $this->apiUrl = "https://api.telegram.org/bot{$token}/";
         $this->client = new Client([
             'base_uri' => $this->apiUrl,
             'timeout'  => 10,
@@ -21,13 +23,21 @@ class TelegramService
             'verify' => false,
 
         ]);
+
+        $appUrl = rtrim(_env('APP_URL'), '/') . '/';
+        $this->appClient = new Client([
+            'base_uri' => $appUrl,
+            'timeout' => 10,
+            'http_errors' => false,
+            'verify' => false,
+        ]);
     }
 
     public function sendText(int $chatId, string $message): void
     {
         file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendText] chat_id: $chatId, message: $message\n", FILE_APPEND);
 
-        $response = $this->client->get('/sendMessage', [
+        $response = $this->client->get('sendMessage', [
             'query' => [
                 'chat_id' => $chatId,
                 'text' => $message
@@ -41,7 +51,7 @@ class TelegramService
     {
         file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendPhoto] chat_id: $chatId, photo: $imageUrl\ncaption: $caption\n", FILE_APPEND);
 
-        $response = $this->client->post('/sendPhoto', [
+        $response = $this->client->post('sendPhoto', [
             'json' => [
                 'chat_id' => $chatId,
                 'photo' => $imageUrl,
@@ -64,7 +74,7 @@ class TelegramService
 
     public function updateLikeButton(int $chatId, int $messageId, int $memeId, int $likeCount): void
     {
-        $this->client->get('/editMessageReplyMarkup', [
+        $this->client->get('editMessageReplyMarkup', [
             'query' => [
                 'chat_id' => $chatId,
                 'message_id' => $messageId,
@@ -83,9 +93,8 @@ class TelegramService
     public function callGenerateEndpoint(string $prompt): ?array
     {
         try {
-            $response = $this->client->post('https://dankterminal.xyz/memes/generate', [
+            $response = $this->appClient->post('memes/generate', [
                 'form_params' => ['prompt' => $prompt],
-                'timeout' => 10,
             ]);
 
             return json_decode($response->getBody(), true);
@@ -99,9 +108,7 @@ class TelegramService
         try {
             $payload = $imageId ? ['form_params' => ['image_id' => $imageId]] : [];
 
-            $response = $this->client->post('https://dankterminal.xyz/memes/creative', array_merge($payload, [
-                'timeout' => 10,
-            ]));
+            $response = $this->appClient->post('memes/creative', $payload);
 
             return json_decode($response->getBody(), true);
         } catch (RequestException $e) {
