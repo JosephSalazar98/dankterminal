@@ -42,8 +42,13 @@ class MemeRenderer
         $relativePath = '/generated/final_' . uniqid() . '.png';
 
         $fullPath = __DIR__ . '/../../public' . $relativePath;
-        $canvas->save($fullPath);
-        file_put_contents(__DIR__ . '/../../tg.log', "✅ Saved to $fullPath\n", FILE_APPEND);
+        try {
+            $canvas->save($fullPath);
+            file_put_contents('/tmp/meme_debug.log', "✅ Saved to $fullPath\n", FILE_APPEND);
+        } catch (\Exception $e) {
+            file_put_contents('/tmp/meme_debug.log', "❌ Failed: " . $e->getMessage() . "\n", FILE_APPEND);
+        }
+
 
         return $relativePath;
     }
