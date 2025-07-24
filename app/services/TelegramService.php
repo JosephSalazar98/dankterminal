@@ -34,7 +34,7 @@ class TelegramService
             ]
         ]);
 
-        file_put_contents(__DIR__ . '/../../storage/logs/app.log', "[sendText] response: " . $response->getBody() . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendText] response: " . $response->getBody() . "\n", FILE_APPEND);
     }
 
     public function sendPhoto(int $chatId, string $imageUrl, string $caption, int $memeId): void

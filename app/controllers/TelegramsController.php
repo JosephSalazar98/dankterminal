@@ -76,7 +76,7 @@ class TelegramsController extends Controller
 
                 $telegram->sendPhoto(
                     $chat_id,
-                    'https://dankterminal.xyz' . $response['image_url'],
+                    $response['image_url'],
                     $response['caption'],
                     $response['meme_id']
                 );
@@ -103,7 +103,7 @@ class TelegramsController extends Controller
 
                 $telegram->sendPhoto(
                     $chat_id,
-                    'https://dankterminal.xyz' . $response['image_url'],
+                    $response['image_url'],
                     $response['caption'],
                     $response['meme_id']
                 );
