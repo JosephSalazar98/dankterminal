@@ -23,6 +23,10 @@ class OpenAIService
 
     public function getEmbedding(string $input): ?array
     {
+        if (_env('MOCK_OPENAI') === 'true') {
+            return array_fill(0, 1536, 0.123456);
+        }
+
         $response = $this->client->post('embeddings', [
             'json' => [
                 'model' => 'text-embedding-3-small',
@@ -36,6 +40,10 @@ class OpenAIService
 
     public function generateCaption(string $prompt, string $description): ?string
     {
+        if (_env('MOCK_OPENAI') === 'true') {
+            return "when ur code compiles and you're scared now";
+        }
+
         $systemPrompt = <<<EOT
 You are a ruthless, extremely online meme master. Your job is to write short, punchy, dank captions that go hard, roast, or slap absurdly. Keep it under 20 words. Your tone is unfiltered irony, layered with passive aggression, self-loathing, or surreal confidence. Do not explain. Do not add punctuation unless part of the joke. Do not wrap in quotes. NEVER write hashtags, emojis, or markdown.
 
