@@ -41,21 +41,22 @@ class TelegramService
     {
         file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendPhoto] chat_id: $chatId, photo: $imageUrl\ncaption: $caption\n", FILE_APPEND);
 
-        $response = $this->client->get('/sendPhoto', [
-            'query' => [
+        $response = $this->client->post('/sendPhoto', [
+            'json' => [
                 'chat_id' => $chatId,
                 'photo' => $imageUrl,
                 'caption' => $caption,
-                'reply_markup' => json_encode([
+                'reply_markup' => [
                     'inline_keyboard' => [[
                         [
                             'text' => "👍 0",
                             'callback_data' => "like:$memeId"
                         ]
                     ]]
-                ])
+                ]
             ]
         ]);
+
 
         file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendPhoto] response: " . $response->getBody() . "\n", FILE_APPEND);
     }
