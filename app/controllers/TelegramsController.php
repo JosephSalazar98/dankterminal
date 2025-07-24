@@ -11,15 +11,23 @@ class TelegramsController extends Controller
     public function webhook()
     {
         $telegram = new TelegramService();
+        $chat_id = null;
+
+        // Try to extract chat_id early in case of later error
+        $input = file_get_contents("php://input");
+        $update = json_decode($input, true);
+
+        if (isset($update['message']['chat']['id'])) {
+            $chat_id = $update['message']['chat']['id'];
+        } elseif (isset($update['callback_query']['message']['chat']['id'])) {
+            $chat_id = $update['callback_query']['message']['chat']['id'];
+        }
 
         try {
-            $update = json_decode(file_get_contents("php://input"), true);
-
             // Likes via inline buttons
             if (isset($update['callback_query'])) {
                 $callback = $update['callback_query'];
                 $data = $callback['data'];
-                $chat_id = $callback['message']['chat']['id'];
                 $user_id = $callback['from']['id'];
                 $message_id = $callback['message']['message_id'];
 
@@ -41,14 +49,12 @@ class TelegramsController extends Controller
 
                     $newCount = Like::where('meme_id', $memeId)->count();
                     $telegram->updateLikeButton($chat_id, $message_id, $memeId, $newCount);
-
-                    exit;
+                    return;
                 }
             }
 
             if (!isset($update['message']['text'])) return;
 
-            $chat_id = $update['message']['chat']['id'];
             $text = trim($update['message']['text']);
 
             if (stripos($text, '/generate') === 0) {
@@ -107,9 +113,10 @@ class TelegramsController extends Controller
                 return;
             }
         } catch (\Throwable $e) {
-            $chat_id ??= null;
             if ($chat_id) {
                 $telegram->sendText($chat_id, "❌ Error:\n" . $e->getMessage());
+            } else {
+                file_put_contents(__DIR__ . '/../../logs/telegram-errors.log', $e . "\n", FILE_APPEND);
             }
         }
     }
