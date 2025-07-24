@@ -13,6 +13,7 @@ class OpenAIService
     {
         $this->client = new Client([
             'base_uri' => 'https://api.openai.com/v1/',
+            'verify' => false,
             'headers' => [
                 'Authorization' => 'Bearer ' . getenv('OPENAI_API_KEY'),
                 'Content-Type' => 'application/json',
@@ -23,7 +24,6 @@ class OpenAIService
     public function getEmbedding(string $input): ?array
     {
         $response = $this->client->post('embeddings', [
-            'verify' => false,
             'json' => [
                 'model' => 'text-embedding-3-small',
                 'input' => $input
@@ -52,7 +52,6 @@ Caption:
 EOM;
 
         $response = $this->client->post('chat/completions', [
-            'verify' => false,
             'json' => [
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [

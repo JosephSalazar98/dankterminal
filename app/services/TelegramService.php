@@ -18,6 +18,8 @@ class TelegramService
             'base_uri' => $this->apiUrl,
             'timeout'  => 10,
             'http_errors' => false,
+            'verify' => false,
+
         ]);
     }
 
