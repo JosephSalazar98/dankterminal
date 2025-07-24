@@ -14,6 +14,13 @@ use App\Services\MemeRenderer;
 
 class EmbedsController extends Controller
 {
+    protected string $baseUrl;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->baseUrl = rtrim(_env('APP_URL'), '/');
+    }
 
 
     public function generateEmbeddings()
@@ -107,7 +114,7 @@ class EmbedsController extends Controller
 
 
         response()->json([
-            'image_url' => '/generated/' . basename($outputPath),
+            'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $bestMeme->id,
             'score' => $bestScore
@@ -137,7 +144,8 @@ class EmbedsController extends Controller
         $baseUrl = rtrim(_env('APP_URL'), '/');
 
         response()->json([
-            'image_url' => $baseUrl . '/generated/' . basename($outputPath),
+
+            'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $meme->id
         ]);
@@ -213,7 +221,7 @@ class EmbedsController extends Controller
         ]);
 
         response()->json([
-            'image_url' => '/generated/' . basename($outputPath),
+            'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $meme->id
         ]);
