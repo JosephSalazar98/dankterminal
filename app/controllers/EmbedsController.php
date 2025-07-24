@@ -108,7 +108,7 @@ class EmbedsController extends Controller
 
 
         response()->json([
-            'image_url' => $outputPath,
+            'image_url' => 'https://dankterminal.xyz/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $bestMeme->id,
             'score' => $bestScore
@@ -136,7 +136,7 @@ class EmbedsController extends Controller
         ]);
 
         response()->json([
-            'image_url' => $outputPath,
+            'image_url' => 'https://dankterminal.xyz/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $meme->id
         ]);
@@ -212,7 +212,7 @@ class EmbedsController extends Controller
         ]);
 
         response()->json([
-            'image_url' => $outputPath,
+            'image_url' => 'https://dankterminal.xyz/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $meme->id
         ]);
