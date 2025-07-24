@@ -12,7 +12,7 @@ class TelegramService
 
     public function __construct()
     {
-        $token = getenv('TELEGRAM_TOKEN');
+        $token = _env('TELEGRAM_TOKEN');
         $this->apiUrl = "https://api.telegram.org/bot{$token}";
         $this->client = new Client([
             'base_uri' => $this->apiUrl,
