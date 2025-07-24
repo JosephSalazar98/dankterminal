@@ -13,7 +13,7 @@ class TelegramService
     public function __construct()
     {
         $token = _env('TELEGRAM_TOKEN');
-        $this->apiUrl = "https://api.telegram.org/bot{$token}";
+        $this->apiUrl = "https://api.telegram.org/bot{$token}/";
         $this->client = new Client([
             'base_uri' => $this->apiUrl,
             'timeout'  => 10,
@@ -27,7 +27,7 @@ class TelegramService
     {
         file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendText] chat_id: $chatId, message: $message\n", FILE_APPEND);
 
-        $response = $this->client->get('/sendMessage', [
+        $response = $this->client->get('sendMessage', [
             'query' => [
                 'chat_id' => $chatId,
                 'text' => $message
@@ -41,7 +41,7 @@ class TelegramService
     {
         file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendPhoto] chat_id: $chatId, photo: $imageUrl\ncaption: $caption\n", FILE_APPEND);
 
-        $response = $this->client->post('/sendPhoto', [
+        $response = $this->client->post('sendPhoto', [
             'json' => [
                 'chat_id' => $chatId,
                 'photo' => $imageUrl,
@@ -64,7 +64,7 @@ class TelegramService
 
     public function updateLikeButton(int $chatId, int $messageId, int $memeId, int $likeCount): void
     {
-        $this->client->get('/editMessageReplyMarkup', [
+        $this->client->get('editMessageReplyMarkup', [
             'query' => [
                 'chat_id' => $chatId,
                 'message_id' => $messageId,
