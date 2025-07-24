@@ -23,7 +23,7 @@ class OpenAIService
 
     public function getEmbedding(string $input): ?array
     {
-        if (_env('MOCK_OPENAI') === 'true') {
+        if (_env('MOCK_OPENAI') === true) {
             return array_fill(0, 1536, 0.123456);
         }
 
@@ -40,7 +40,7 @@ class OpenAIService
 
     public function generateCaption(string $prompt, string $description): ?string
     {
-        if (_env('MOCK_OPENAI') === 'true') {
+        if (_env('MOCK_OPENAI') === true) {
             return "when ur code compiles and you're scared now";
         }
 
