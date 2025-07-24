@@ -25,7 +25,7 @@ class TelegramService
 
     public function sendText(int $chatId, string $message): void
     {
-        file_put_contents(__DIR__ . '/../../storage/logs/app.log', "[sendText] chat_id: $chatId, message: $message\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendText] chat_id: $chatId, message: $message\n", FILE_APPEND);
 
         $response = $this->client->get('/sendMessage', [
             'query' => [
@@ -39,7 +39,7 @@ class TelegramService
 
     public function sendPhoto(int $chatId, string $imageUrl, string $caption, int $memeId): void
     {
-        file_put_contents(__DIR__ . '/../../storage/logs/app.log', "[sendPhoto] chat_id: $chatId, photo: $imageUrl\ncaption: $caption\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendPhoto] chat_id: $chatId, photo: $imageUrl\ncaption: $caption\n", FILE_APPEND);
 
         $response = $this->client->get('/sendPhoto', [
             'query' => [
@@ -57,8 +57,9 @@ class TelegramService
             ]
         ]);
 
-        file_put_contents(__DIR__ . '/../../storage/logs/app.log', "[sendPhoto] response: " . $response->getBody() . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/../../storage/logs/tg.log', "[sendPhoto] response: " . $response->getBody() . "\n", FILE_APPEND);
     }
+
 
     public function updateLikeButton(int $chatId, int $messageId, int $memeId, int $likeCount): void
     {
