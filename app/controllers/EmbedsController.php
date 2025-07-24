@@ -99,7 +99,6 @@ class EmbedsController extends Controller
 
         $renderer = new MemeRenderer();
         $outputPath = $renderer->render(__DIR__ . '/../../public' . $bestMeme->image_path, $caption);
-        dd($outputPath);
 
         Caption::create([
             'meme_id' => $bestMeme->id,

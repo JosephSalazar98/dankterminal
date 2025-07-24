@@ -15,6 +15,7 @@ class TelegramService
     {
         $token = _env('TELEGRAM_TOKEN');
         // Trailing slash ensures request paths append after /bot{token}
+
         $this->apiUrl = "https://api.telegram.org/bot{$token}/";
         $this->client = new Client([
             'base_uri' => $this->apiUrl,
