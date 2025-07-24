@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Models\Like;
-
 use App\Services\TelegramService;
 
 class TelegramsController extends Controller
@@ -13,10 +12,12 @@ class TelegramsController extends Controller
         $telegram = new TelegramService();
         $chat_id = null;
 
-        // Try to extract chat_id early in case of later error
+        // Recibir y loguear el update para debug general
         $input = file_get_contents("php://input");
+        file_put_contents(__DIR__ . '/../../storage/webhook.log', "[" . date('Y-m-d H:i:s') . "] " . $input . "\n", FILE_APPEND);
         $update = json_decode($input, true);
 
+        // Extraer el chat_id lo más pronto posible
         if (isset($update['message']['chat']['id'])) {
             $chat_id = $update['message']['chat']['id'];
         } elseif (isset($update['callback_query']['message']['chat']['id'])) {
@@ -57,6 +58,7 @@ class TelegramsController extends Controller
 
             $text = trim($update['message']['text']);
 
+            // /generate
             if (stripos($text, '/generate') === 0) {
                 $prompt = trim(substr($text, strlen('/generate')));
 
@@ -87,6 +89,7 @@ class TelegramsController extends Controller
                 return;
             }
 
+            // /creative
             if (stripos($text, '/creative') === 0) {
                 $parts = explode(' ', $text);
                 $imageId = $parts[1] ?? null;
@@ -113,11 +116,17 @@ class TelegramsController extends Controller
                 return;
             }
         } catch (\Throwable $e) {
+            $errorMessage = "❌ Error:\n" . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine();
+
             if ($chat_id) {
-                $telegram->sendText($chat_id, "❌ Error:\n" . $e->getMessage());
-            } else {
-                file_put_contents(__DIR__ . '/../../logs/telegram-errors.log', $e . "\n", FILE_APPEND);
+                $telegram->sendText($chat_id, $errorMessage);
             }
+
+            file_put_contents(
+                __DIR__ . '/../../storage/telegram-errors.log',
+                "[" . date('Y-m-d H:i:s') . "]\n" . $errorMessage . "\n\n",
+                FILE_APPEND
+            );
         }
     }
 }
