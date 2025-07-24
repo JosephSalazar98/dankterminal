@@ -9,10 +9,12 @@ class TelegramService
 {
     private string $apiUrl;
     private Client $client;
+    private Client $appClient;
 
     public function __construct()
     {
         $token = _env('TELEGRAM_TOKEN');
+
         $this->apiUrl = "https://api.telegram.org/bot{$token}/";
         $this->client = new Client([
             'base_uri' => $this->apiUrl,
@@ -20,6 +22,14 @@ class TelegramService
             'http_errors' => false,
             'verify' => false,
 
+        ]);
+
+        $appUrl = rtrim(_env('APP_URL'), '/') . '/';
+        $this->appClient = new Client([
+            'base_uri' => $appUrl,
+            'timeout' => 10,
+            'http_errors' => false,
+            'verify' => false,
         ]);
     }
 
@@ -83,9 +93,8 @@ class TelegramService
     public function callGenerateEndpoint(string $prompt): ?array
     {
         try {
-            $response = $this->client->post('https://dankterminal.xyz/memes/generate', [
+            $response = $this->appClient->post('memes/generate', [
                 'form_params' => ['prompt' => $prompt],
-                'timeout' => 10,
             ]);
 
             return json_decode($response->getBody(), true);
@@ -99,9 +108,7 @@ class TelegramService
         try {
             $payload = $imageId ? ['form_params' => ['image_id' => $imageId]] : [];
 
-            $response = $this->client->post('https://dankterminal.xyz/memes/creative', array_merge($payload, [
-                'timeout' => 10,
-            ]));
+            $response = $this->appClient->post('memes/creative', $payload);
 
             return json_decode($response->getBody(), true);
         } catch (RequestException $e) {
