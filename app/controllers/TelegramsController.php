@@ -93,6 +93,7 @@ class TelegramsController extends Controller
 
                 $response = $telegram->callCreativeEndpoint($imageId);
                 file_put_contents('tg.log', json_encode($response), FILE_APPEND);
+
                 if (!$response || !isset($response['image_url'], $response['caption'], $response['meme_id'])) {
                     $telegram->sendText($chat_id, "Couldn't create meme at the moment. Try again later.");
                     return;
@@ -104,8 +105,6 @@ class TelegramsController extends Controller
                     $response['caption'],
                     $response['meme_id']
                 );
-
-
 
                 return;
             }

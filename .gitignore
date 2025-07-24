@@ -28,6 +28,7 @@ storage/framework
 storage/logs
 storage/database
 public/storage
+public/generated/
 
 # Logs
 npm-debug.log

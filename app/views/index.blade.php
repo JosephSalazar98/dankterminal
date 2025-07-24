@@ -161,7 +161,48 @@ Available commands:
 
 
 
+                    } else if (cmd === "creative") {
+                        this.loading = true;
+                        this.history[index].spinner = this.spinnerFrames[0];
+                        this.spinnerIndex = 0;
 
+                        this.spinnerInterval = setInterval(() => {
+                            this.spinnerIndex = (this.spinnerIndex + 1) % this.spinnerFrames
+                                .length;
+                            this.history[index].spinner = this.spinnerFrames[this
+                                .spinnerIndex];
+                        }, 100);
+
+                        try {
+                            const res = await fetch("/memes/creative", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    prompt: argText
+                                }),
+                            });
+
+                            const data = await res.json();
+                            clearInterval(this.spinnerInterval);
+                            delete this.history[index].spinner;
+                            this.loading = false;
+
+                            if (data.image_url) {
+                                this.history[index].caption = data.caption;
+                                this.history[index].image = data.image_url;
+                            } else {
+                                this.history[index].error = data.error || "Something went wrong.";
+                            }
+                        } catch (e) {
+                            clearInterval(this.spinnerInterval);
+                            delete this.history[index].spinner;
+                            this.loading = false;
+                            this.history[index].error = "Failed to reach server.";
+                        }
+
+                        return;
                     } else {
                         this.history[index].error = `Unknown command: /${cmd}`;
                     }

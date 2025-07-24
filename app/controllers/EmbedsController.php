@@ -136,7 +136,7 @@ class EmbedsController extends Controller
         ]);
 
         response()->json([
-            'image_url' => '/generated/' . basename($outputPath),
+            'image_url' => 'https://dankterminal.xyz/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $meme->id
         ]);
