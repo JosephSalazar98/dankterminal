@@ -93,7 +93,8 @@ class TelegramService
     public function callGenerateEndpoint(string $prompt): ?array
     {
         try {
-            $response = $this->appClient->post('memes/generate', [
+            $response = $this->client->post('https://dankterminal.xyz/memes/generate', [
+
                 'form_params' => ['prompt' => $prompt],
             ]);
 
