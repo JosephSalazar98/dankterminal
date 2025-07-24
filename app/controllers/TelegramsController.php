@@ -81,10 +81,7 @@ class TelegramsController extends Controller
                     $response['meme_id']
                 );
 
-                $localPath = __DIR__ . '/../../public' . $response['image_url'];
-                if (file_exists($localPath)) {
-                    unlink($localPath);
-                }
+
 
                 return;
             }
@@ -108,10 +105,7 @@ class TelegramsController extends Controller
                     $response['meme_id']
                 );
 
-                $localPath = __DIR__ . '/../../public' . $response['image_url'];
-                if (file_exists($localPath)) {
-                    unlink($localPath);
-                }
+
 
                 return;
             }
