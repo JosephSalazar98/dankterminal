@@ -10,6 +10,7 @@ class TelegramService
     private string $apiUrl;
     private Client $client;
     private Client $appClient;
+    private string $baseUrl;
 
     public function __construct()
     {
@@ -24,7 +25,8 @@ class TelegramService
 
         ]);
 
-        $appUrl = rtrim(_env('APP_URL'), '/') . '/';
+        $this->baseUrl = rtrim(_env('APP_URL'), '/');
+        $appUrl = $this->baseUrl . '/';
         $this->appClient = new Client([
             'base_uri' => $appUrl,
             'timeout' => 10,
@@ -93,9 +95,12 @@ class TelegramService
     public function callGenerateEndpoint(string $prompt): ?array
     {
         try {
-            $response = $this->appClient->post('memes/generate', [
-                'form_params' => ['prompt' => $prompt],
-            ]);
+            $response = $this->appClient->post(
+                $this->baseUrl . '/memes/generate',
+                [
+                    'form_params' => ['prompt' => $prompt],
+                ]
+            );
 
             return json_decode($response->getBody(), true);
         } catch (RequestException $e) {
@@ -108,7 +113,10 @@ class TelegramService
         try {
             $payload = $imageId ? ['form_params' => ['image_id' => $imageId]] : [];
 
-            $response = $this->appClient->post('memes/creative', $payload);
+            $response = $this->appClient->post(
+                $this->baseUrl . '/memes/creative',
+                $payload
+            );
 
             return json_decode($response->getBody(), true);
         } catch (RequestException $e) {
