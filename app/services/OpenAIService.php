@@ -38,7 +38,7 @@ class OpenAIService
         return $data['data'][0]['embedding'] ?? null;
     }
 
-    public function generateCaption(string $prompt, string $description): ?string
+    public function generateCaption(?string $prompt, string $description): ?string
     {
         if (_env('MOCK_OPENAI') === true) {
             return "when ur code compiles and you're scared now";
@@ -50,7 +50,9 @@ You are a ruthless, extremely online meme master. Your job is to write short, pu
 You never reply as if in a conversation. You ONLY return one meme caption starting directly after the word “Caption:”.
 EOT;
 
-        $userMessage = <<<EOM
+
+        if ($prompt) {
+            $userMessage = <<<EOM
 Generate a meme caption based on the following:
 Topic: $prompt
 Image Description: $description
@@ -58,6 +60,16 @@ Only output the caption below.
 
 Caption:
 EOM;
+        } else {
+            $userMessage = <<<EOM
+Generate a random situation based on the Images Description.
+Then turn that situation into a meme caption
+Image Description: $description
+Only output the caption below.
+
+Caption:
+EOM;
+        }
 
         $response = $this->client->post('chat/completions', [
             'json' => [

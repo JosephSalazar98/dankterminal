@@ -121,35 +121,6 @@ class EmbedsController extends Controller
         ]);
     }
 
-    public function generateFromRandom()
-    {
-        $meme = Meme::inRandomOrder()->whereNotNull('embedding')->first();
-
-        if (!$meme) {
-            response()->json(['error' => 'No memes with embeddings'], 404);
-            return;
-        }
-
-        $openAI = new OpenAIService();
-        $renderer = new MemeRenderer();
-
-        $caption = $openAI->generateCaption($meme->description, $meme->description);
-        $outputPath = $renderer->render(__DIR__ . '/../../public' . $meme->image_path, $caption);
-
-        Caption::create([
-            'meme_id' => $meme->id,
-            'caption' => $caption
-        ]);
-
-        $baseUrl = rtrim(_env('APP_URL'), '/');
-
-        response()->json([
-
-            'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
-            'caption' => $caption,
-            'meme_id' => $meme->id
-        ]);
-    }
 
     public function showMeme($id)
     {
@@ -226,6 +197,37 @@ class EmbedsController extends Controller
             'meme_id' => $meme->id
         ]);
     }
+
+    public function generateFromRandom()
+    {
+        $meme = Meme::inRandomOrder()->whereNotNull('embedding')->first();
+
+        if (!$meme) {
+            response()->json(['error' => 'No memes with embeddings'], 404);
+            return;
+        }
+
+        $openAI = new OpenAIService();
+        $renderer = new MemeRenderer();
+
+        $caption = $openAI->generateCaption($meme->description, $meme->description);
+        $outputPath = $renderer->render(__DIR__ . '/../../public' . $meme->image_path, $caption);
+
+        Caption::create([
+            'meme_id' => $meme->id,
+            'caption' => $caption
+        ]);
+
+        $baseUrl = rtrim(_env('APP_URL'), '/');
+
+        response()->json([
+
+            'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
+            'caption' => $caption,
+            'meme_id' => $meme->id
+        ]);
+    }
+
 
     public function uploadMeme()
     {
