@@ -86,13 +86,22 @@ EOT;
         $data = json_decode($response->getBody(), true);
         $content = $data['choices'][0]['message']['content'] ?? '';
 
-        // 🔹 Sanitizar: eliminar comillas (dobles, simples y tipográficas)
+        // 🔹 Sanitizar comillas y guiones
         $content = str_replace(
             ['"', "'", '“', '”', '‘', '’', '—', '–'],
             ['',  '',  '',   '',   '',   '',   ',',  ','],
             $content
         );
 
+        // 🔹 Quitar emojis y caracteres fuera de rango UTF-8 básico
+        $content = preg_replace('/[\x{1F600}-\x{1F64F}]/u', '', $content); // emoticons
+        $content = preg_replace('/[\x{1F300}-\x{1F5FF}]/u', '', $content); // pictograms
+        $content = preg_replace('/[\x{1F680}-\x{1F6FF}]/u', '', $content); // transport
+        $content = preg_replace('/[\x{2600}-\x{26FF}]/u', '', $content);   // misc symbols
+        $content = preg_replace('/[\x{2700}-\x{27BF}]/u', '', $content);   // dingbats
+
+        // O si prefieres algo más genérico para eliminar TODO lo no soportado:
+        $content = preg_replace('/[^\x00-\x7F\xA0-\xFF]/u', '', $content);
 
         return trim($content);
     }

@@ -199,7 +199,7 @@ class EmbedsController extends Controller
         $openAI = new OpenAIService();
         $renderer = new MemeRenderer();
 
-        $caption = $openAI->generateCaption($meme->description, $meme->description);
+        $caption = $openAI->generateCaption($meme->description);
         $outputPath = $renderer->render(__DIR__ . '/../../public' . $meme->image_path, $caption);
 
         Caption::create([
