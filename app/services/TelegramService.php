@@ -104,16 +104,14 @@ class TelegramService
         }
     }
 
-    public function callCreativeEndpoint(?string $imageId = null): ?array
+    public function callCreativeEndpoint(): ?array
     {
         try {
-            $payload = $imageId ? ['form_params' => ['image_id' => $imageId]] : [];
-
-            $response = $this->appClient->post('memes/creative', $payload);
+            $response = $this->appClient->post('memes/creative');
 
             return json_decode($response->getBody(), true);
         } catch (RequestException $e) {
-            return ['error' => 'Request failed'];
+            return ['error' => 'Request failed', 'details' => $e->getMessage()];
         }
     }
 }
