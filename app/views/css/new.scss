@@ -1,0 +1,553 @@
+// ========== TOKENS ==========
+$green: #39ff14; // bright neon green
+$green-soft: #9aff6b; // secondary neon
+$amber: #f8d66d;
+$ice: #6de7f8;
+
+$bg-0: #020403; // deepest background
+$bg-1: #070d0a; // shell
+$bg-2: #0b150f; // panels
+$ink: #cfe9d2; // primary text
+$ink-dim: #87b493; // muted text
+
+$border: rgba($green, 0.35);
+$shadow: 0 0 0 1px rgba($green, .08), 0 0 30px rgba($green, .06);
+
+// mixins
+@mixin neon-border($c) {
+    border: 1px solid rgba($c, .35);
+    box-shadow: 0 0 0 1px rgba($c, .1) inset, 0 0 24px rgba($c, .08);
+}
+
+@mixin glow-text($c) {
+    text-shadow: 0 0 8px rgba($c, .9), 0 0 24px rgba($c, .5);
+}
+
+@mixin panel {
+    background: $bg-2;
+    @include neon-border($green);
+    border-radius: 12px;
+}
+
+// ========== BASE ==========
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body.dt {
+    margin: 0;
+    background: radial-gradient(1000px 600px at 20% -10%, rgba($green, .05), transparent 60%),
+        radial-gradient(1200px 800px at 120% 20%, rgba($green, .06), transparent 60%),
+        $bg-0;
+    color: $ink;
+    font: 14px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+// scanlines (no animation)
+.dt__scanlines {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background:
+        repeating-linear-gradient(to bottom, rgba(#000, .27) 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay;
+    opacity: .5;
+    z-index: 0;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+// ========== HEADER ==========
+.dt__header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    background: linear-gradient(to bottom, rgba($bg-1, .95), rgba($bg-1, .85));
+    border-bottom: 1px solid $border;
+    box-shadow: $shadow;
+
+    .brand {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+
+        &__mark {
+            color: $green;
+            @include glow-text($green);
+            letter-spacing: .5px;
+        }
+
+        &__name {
+            color: $ink;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+    }
+
+    .stats {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        &__item {
+            display: grid;
+            gap: 6px;
+        }
+
+        &__label {
+            color: $ink-dim;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+        }
+
+        &__bar {
+            --val: 50;
+            width: 160px;
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, $green 0 calc(var(--val) * 1%), rgba($green, .12) calc(var(--val) * 1%) 100%);
+            outline: 1px solid $border;
+            box-shadow: inset 0 0 18px rgba($green, .2);
+        }
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+}
+
+// ========== LAYOUT ==========
+.dt__body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    padding: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.sidebar {
+    position: sticky;
+    top: 70px;
+    align-self: start;
+    padding: 12px;
+    @include panel;
+
+    .menu {
+        &__title {
+            color: $ink-dim;
+            font-size: 12px;
+            margin: 8px 6px;
+            letter-spacing: .14em;
+        }
+
+        &__item {
+            display: block;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: $ink;
+            text-decoration: none;
+            border: 1px dashed transparent;
+
+            &:hover {
+                border-color: $border;
+                background: rgba($green, .06);
+            }
+
+            &--active {
+                background: rgba($green, .08);
+                border-color: $border;
+                color: $green;
+            }
+        }
+    }
+
+    &__footer {
+        margin-top: 12px;
+        display: grid;
+        gap: 8px;
+    }
+
+    .badge {
+        border-radius: 8px;
+        padding: 8px 10px;
+        border: 1px solid $border;
+        color: $ink-dim;
+        background: rgba($green, .05);
+    }
+}
+
+.main {
+    display: grid;
+    gap: 16px;
+}
+
+// ========== PANELS ==========
+.panel {
+    @include panel;
+}
+
+.panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px 0;
+}
+
+.panel__title {
+    margin: 0;
+    color: $green;
+    @include glow-text($green);
+}
+
+.panel__tools {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px 12px 12px;
+}
+
+.panel--console .console {
+    padding: 12px;
+}
+
+.panel:not(.is-active) {
+    display: none;
+}
+
+// ========== CONSOLE ==========
+.console {
+    border: 1px solid $border;
+    border-radius: 10px;
+    background: #050a08;
+    box-shadow: inset 0 0 24px rgba($green, .06);
+
+    &__screen {
+        min-height: 240px;
+        max-height: 52vh;
+        overflow: auto;
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+    }
+
+    &__line {
+        margin: 0;
+        color: $ink;
+    }
+
+    &__prompt {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 8px;
+        padding: 10px 12px;
+        border-top: 1px dashed $border;
+        align-items: center;
+    }
+
+    &__caret {
+        color: $green;
+        @include glow-text($green);
+    }
+
+    &__input {
+        background: transparent;
+        border: none;
+        color: $ink;
+        outline: none;
+        font: inherit;
+        padding: 6px 0;
+    }
+}
+
+// ========== GALLERY ==========
+.gallery {
+    padding: 12px;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.meme-card {
+    border: 1px solid $border;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #08110c;
+    display: grid;
+    grid-template-rows: auto auto;
+
+    &__thumb {
+        aspect-ratio: 1/1;
+        background:
+            linear-gradient(135deg, rgba($green, .12), transparent),
+            radial-gradient(300px 200px at 20% 10%, rgba($green, .25), transparent 60%),
+            #06110a;
+        outline: 1px solid rgba($green, .2);
+    }
+
+    &__caption {
+        margin: 0;
+        padding: 10px 12px;
+        color: $ink;
+        border-top: 1px dashed $border;
+    }
+}
+
+// ========== QUEUE ==========
+.queue {
+    list-style: none;
+    padding: 12px;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.queue__item {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px dashed $border;
+    border-radius: 8px;
+    background: rgba($green, .04);
+}
+
+.queue__label {
+    color: $green;
+}
+
+.queue__desc {
+    color: $ink-dim;
+}
+
+// ========== FORMS / TOGGLES ==========
+.form {
+    padding: 12px;
+    display: grid;
+    gap: 16px;
+}
+
+.form__legend {
+    color: $ink-dim;
+    margin-bottom: 8px;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+
+    input {
+        display: none;
+    }
+
+    &__ui {
+        width: 36px;
+        height: 20px;
+        border-radius: 999px;
+        position: relative;
+        background: rgba($green, .15);
+        border: 1px solid $border;
+
+        &::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 1px;
+            left: 1px;
+            border-radius: 50%;
+            background: $green;
+            box-shadow: 0 0 14px rgba($green, .6);
+        }
+    }
+
+    input:checked+.toggle__ui::after {
+        left: 17px;
+    }
+
+    .toggle__label {
+        color: $ink;
+    }
+}
+
+.chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    border: 1px solid $border;
+    background: rgba($green, .06);
+    color: $ink;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba($green, .1);
+    }
+}
+
+// ========== BUTTONS ==========
+.btn {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: $ink;
+    background: transparent;
+    border: 1px solid $border;
+
+    &--ghost {
+        background: rgba($green, .06);
+    }
+
+    &--outline {
+        background: transparent;
+    }
+
+    &--chip {
+        padding: 6px 10px;
+        border-radius: 999px;
+    }
+}
+
+// ========== STATUS BAR ==========
+.dt__footer.status {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba($bg-1, .92);
+    border-top: 1px solid $border;
+}
+
+.status__light {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: $green;
+    box-shadow: 0 0 14px rgba($green, .9);
+}
+
+.status__text {
+    color: $ink;
+}
+
+// ========== RESPONSIVE ==========
+@media (max-width: 1100px) {
+    .gallery {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 860px) {
+    .dt__body {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+        order: -1;
+        display: none;
+    }
+
+    .sidebar.is-open {
+        display: block;
+    }
+
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .gallery {
+        grid-template-columns: 1fr;
+    }
+
+    .queue__item {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+}
+
+// ========== THEMES ==========
+:root {
+    --accent: #{$green};
+}
+
+[data-theme="amber"] {
+    --accent: #{$amber};
+}
+
+[data-theme="ice"] {
+    --accent: #{$ice};
+}
+
+[data-theme="neon"] {
+    --accent: #{$green};
+}
+
+:root,
+[data-theme] {
+
+    // map CSS var into places that need it (keeps SCSS look, enables runtime theme)
+    .panel__title,
+    .console__caret,
+    .queue__label {
+        color: var(--accent);
+    }
+
+    .brand__mark {
+        color: var(--accent);
+    }
+
+    .chip,
+    .btn--ghost {
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
+    }
+
+    .status__light {
+        background: var(--accent);
+        box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 80%, black);
+    }
+
+    .meme-card__thumb {
+        background:
+            linear-gradient(135deg, color-mix(in srgb, var(--accent) 25%, transparent), transparent),
+            radial-gradient(300px 200px at 20% 10%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 60%),
+            #06110a;
+    }
+}
+
+.u-mt-lg {
+    margin-top: 18px;
+}

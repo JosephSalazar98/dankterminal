@@ -156,18 +156,7 @@ class EmbedsController extends Controller
 
     public function generateCreative()
     {
-        $imageId = request()->input('image_id');
-
-        if (is_array($imageId)) {
-            $imageId = array_filter($imageId);
-            $imageId = reset($imageId);
-        }
-
-        if (!empty($imageId) && is_numeric($imageId)) {
-            return $this->generateFromImageId($imageId);
-        } else {
-            return $this->generateFromRandom();
-        }
+        return $this->generateFromRandom();
     }
 
 
@@ -221,7 +210,6 @@ class EmbedsController extends Controller
         $baseUrl = rtrim(_env('APP_URL'), '/');
 
         response()->json([
-
             'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
             'caption' => $caption,
             'meme_id' => $meme->id
@@ -239,12 +227,20 @@ class EmbedsController extends Controller
             return;
         }
 
-        $filename = uniqid() . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
+        // Get the original filename safely
+        $originalName = pathinfo($file['name'], PATHINFO_FILENAME);
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+        // Sanitize filename (remove spaces/special chars)
+        $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
+        $filename = $safeName . '.' . $extension;
+
+        // Save to the same name in your assets/img folder
         $path = __DIR__ . '/../../public/assets/img/' . $filename;
         move_uploaded_file($file['tmp_name'], $path);
 
         $meme = new Meme();
-        $meme->title = $filename;
+        $meme->title = $safeName;
         $meme->category = "";
         $meme->image_path = "/assets/img/$filename";
         $meme->description = $desc;

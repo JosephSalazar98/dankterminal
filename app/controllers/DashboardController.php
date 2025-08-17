@@ -2,11 +2,30 @@
 
 namespace App\Controllers;
 
+use App\Models\Meme;
+
 class DashboardController extends Controller
 {
     public function show()
     {
-        response()->render('dashboard');
+        // Trae los memes con sus captions
+        $memes = Meme::with('captions')->get();
+
+        // Construir una lista "aplanada" de pares (meme + caption)
+        $items = [];
+        foreach ($memes as $meme) {
+            foreach ($meme->captions as $caption) {
+                $items[] = [
+                    'image'   => $meme->image_path,
+                    'caption' => $caption->caption,
+                ];
+            }
+        }
+
+        // Mezclar todo para que no se repitan seguidos
+        shuffle($items);
+
+        response()->render('index', ['items' => $items]);
     }
 
     public function manage()

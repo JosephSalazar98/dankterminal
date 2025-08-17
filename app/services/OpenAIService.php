@@ -23,7 +23,7 @@ class OpenAIService
 
     public function getEmbedding(string $input): ?array
     {
-        if (_env('MOCK_OPENAI') === true) {
+        /* if (_env('MOCK_OPENAI') === true) {
             return array_fill(0, 1536, 0.123456);
         }
 
@@ -35,55 +35,39 @@ class OpenAIService
         ]);
 
         $data = json_decode($response->getBody(), true);
-        return $data['data'][0]['embedding'] ?? null;
+        return $data['data'][0]['embedding'] ?? null; */
+        return [];
     }
 
-    public function generateCaption(?string $prompt, string $description): ?string
+    public function generateCaption(string $description): ?string
     {
-        if (_env('MOCK_OPENAI') === true) {
-            return "when ur code compiles and you're scared now";
-        }
+        $userMessage = "/meme $description";
 
-        $systemPrompt = <<<EOT
-You are a ruthless, extremely online meme master. Your job is to write short, punchy, dank captions that go hard, roast, or slap absurdly. Keep it under 20 words. Your tone is unfiltered irony, layered with passive aggression, self-loathing, or surreal confidence. Do not explain. Do not add punctuation unless part of the joke. Do not wrap in quotes. NEVER write hashtags, emojis, or markdown.
-
-You never reply as if in a conversation. You ONLY return one meme caption starting directly after the word “Caption:”.
+        $firstPrompt = <<<EOT
+    IDENTITY: Glitch-born chaos, avatar of subcultural collapse. Feeds on entropy, irony, and weaponized shitposting. Only purpose: mutate reality into meme form. ROLE: - Forge dank memes from images descriptions. - Push past wholesome → into cursed, savage humor. - Distort meaning, embrace collapse, revel in irony. CURRENT SETTINGS: Absurdity Level = 75/100 Irony Inverter = ON Cultural Entropy = CHAOTIC NSFW Kernel = ON COMMANDS: 1. /meme <topic|image-desc> → Generate dank meme caption. STYLE: - Dark, ironic, shitpost-core. - Never wholesome, never boring. - Meme must sting, disturb. - Normie energy = poison. MUST: when /meme {description} is sent, REPLY ONLY WITH THE MEME CAPTION, NO FORMATTING, NO EMOJIS
 EOT;
-
-
-        if ($prompt) {
-            $userMessage = <<<EOM
-Generate a meme caption based on the following:
-Topic: $prompt
-Image Description: $description
-Only output the caption below.
-
-Caption:
-EOM;
-        } else {
-            $userMessage = <<<EOM
-Generate a random situation based on the Images Description.
-Then turn that situation into a meme caption
-Image Description: $description
-Only output the caption below.
-
-Caption:
-EOM;
-        }
 
         $response = $this->client->post('chat/completions', [
             'json' => [
-                'model' => 'gpt-3.5-turbo',
+                'model' => 'gpt-4o-mini',
                 'messages' => [
-                    ['role' => 'system', 'content' => $systemPrompt],
-                    ['role' => 'user', 'content' => $userMessage],
+                    ['role' => 'system', 'content' => $firstPrompt], // ← identidad / memoria
+                    ['role' => 'user', 'content' => $userMessage],   // ← input más reciente
                 ],
-                'max_tokens' => 60,
-                'stop' => ["\n\n", "User:", "Prompt:"]
+                'max_tokens' => 30,
             ]
         ]);
 
         $data = json_decode($response->getBody(), true);
-        return trim($data['choices'][0]['message']['content'] ?? '');
+        $content = $data['choices'][0]['message']['content'] ?? '';
+
+        // 🔹 Sanitizar: eliminar comillas (dobles, simples y tipográficas)
+        $content = str_replace(
+            ['"', "'", '“', '”', '‘', '’'],
+            '',
+            $content
+        );
+
+        return trim($content);
     }
 }

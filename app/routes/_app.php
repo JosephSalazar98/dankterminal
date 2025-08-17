@@ -1,26 +1,10 @@
 <?php
 
-app()->view('/', 'index');
-
-app()->post('/memes/load-array', [
-    'middleware' => 'auth.required',
-    'EmbedsController@loadFromArray'
-]);
-
-app()->post('/memes/generate-embeddings', [
-    'middleware' => 'auth.required',
-    'EmbedsController@generateEmbeddings'
-]);
-
-app()->post('/memes/find-match', 'EmbedsController@matchPrompt');
+app()->get('/', 'DashboardController@show');
 
 app()->post('/memes/generate', 'EmbedsController@generateFinalMeme');
 
 app()->post('/telegram/webhook', 'TelegramsController@webhook');
-
-app()->get('/gallery', 'GalleriesController@showGallery');
-
-app()->get('/meme/{id}', 'EmbedsController@showMeme');
 
 app()->get('/login', ['middleware' => 'auth.guest', 'AuthController@showLoginForm']);
 
