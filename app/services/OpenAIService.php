@@ -49,7 +49,7 @@ EOT;
 
         $response = $this->client->post('chat/completions', [
             'json' => [
-                'model' => 'gpt-3.5-turbo',
+                'model' => 'gpt-4o-mini',
                 'messages' => [
                     ['role' => 'system', 'content' => $firstPrompt], // ← identidad / memoria
                     ['role' => 'user', 'content' => $userMessage],   // ← input más reciente
