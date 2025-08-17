@@ -51,10 +51,11 @@ EOT;
             'json' => [
                 'model' => 'gpt-4o-mini',
                 'messages' => [
-                    ['role' => 'system', 'content' => $firstPrompt], // ← identidad / memoria
-                    ['role' => 'user', 'content' => $userMessage],   // ← input más reciente
+                    ['role' => 'user', 'content' => $firstPrompt],
+                    ['role' => 'assistant', 'content' => 'ok'],
+                    ['role' => 'user', 'content' => $userMessage],
                 ],
-                'max_tokens' => 28,
+                'max_tokens' => 25, // 20–30 como dijiste es suficiente para captions
             ]
         ]);
 
