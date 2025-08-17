@@ -107,7 +107,13 @@ class TelegramService
     public function callCreativeEndpoint(): ?array
     {
         try {
-            $response = $this->appClient->post('memes/creative');
+            $response = $this->appClient->post('memes/creative', [
+                'form_params' => []
+            ]);
+
+            if ($response->getStatusCode() !== 200) {
+                return ['error' => 'Bad status', 'status' => $response->getStatusCode(), 'body' => (string) $response->getBody()];
+            }
 
             return json_decode($response->getBody(), true);
         } catch (RequestException $e) {
