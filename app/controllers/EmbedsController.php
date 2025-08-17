@@ -240,7 +240,7 @@ class EmbedsController extends Controller
 
         response()->json([
             'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
-            'caption' => $caption,
+            'caption' => $caption . "\n$" . "dank",
             'meme_id' => $meme->id
         ]);
     }
