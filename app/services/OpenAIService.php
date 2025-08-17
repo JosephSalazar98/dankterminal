@@ -54,7 +54,7 @@ EOT;
                     ['role' => 'system', 'content' => $firstPrompt], // ← identidad / memoria
                     ['role' => 'user', 'content' => $userMessage],   // ← input más reciente
                 ],
-                'max_tokens' => 60,
+                'max_tokens' => 28,
             ]
         ]);
 
