@@ -216,6 +216,35 @@ class EmbedsController extends Controller
         ]);
     }
 
+    public function generateFromRandomCron()
+    {
+        $meme = Meme::inRandomOrder()->whereNotNull('embedding')->first();
+
+        if (!$meme) {
+            response()->json(['error' => 'No memes with embeddings'], 404);
+            return;
+        }
+
+        $openAI = new OpenAIService();
+        $renderer = new MemeRenderer();
+
+        $caption = $openAI->generateCaption($meme->description);
+        $outputPath = $renderer->renderAndPost(__DIR__ . '/../../public' . $meme->image_path, $caption);
+
+        Caption::create([
+            'meme_id' => $meme->id,
+            'caption' => $caption
+        ]);
+
+        $baseUrl = rtrim(_env('APP_URL'), '/');
+
+        response()->json([
+            'image_url' => $this->baseUrl . '/generated/' . basename($outputPath),
+            'caption' => $caption,
+            'meme_id' => $meme->id
+        ]);
+    }
+
 
     public function uploadMeme()
     {

@@ -73,7 +73,7 @@ EOT;
 
         $response = $this->client->post('chat/completions', [
             'json' => [
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-3.5-turbo',
                 'messages' => [
                     ['role' => 'user', 'content' => $firstPrompt],
                     ['role' => 'assistant', 'content' => 'ok'],

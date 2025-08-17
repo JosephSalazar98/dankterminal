@@ -21,3 +21,8 @@ app()->post('/memes/creative', 'EmbedsController@generateCreative');
 app()->get('/manage-memes', ['middleware' => 'auth.required', 'DashboardController@manage']);
 app()->post('/memes/update-description', ['middleware' => 'auth.required', 'DashboardController@updateDescription']);
 app()->post('/memes/delete', ['middleware' => 'auth.required', 'DashboardController@delete']);
+
+app()->get('/twitter/login',    'TwitterAuthController@login');
+app()->get('/twitter/callback', 'TwitterAuthController@callback');
+
+app()->get('/cron', 'EmbedsController@generateFromRandomCron');
