@@ -12,7 +12,7 @@ app()->post('/login', 'AuthController@login');
 
 app()->get('/logout', 'AuthController@logout');
 
-app()->get('/dashboard', ['middleware' => 'auth.required', 'DashboardController@show']);
+app()->get('/dashboard', ['middleware' => 'auth.required', 'DashboardController@upload']);
 
 app()->post('/upload', ['middleware' => 'auth.required', 'EmbedsController@uploadMeme']);
 

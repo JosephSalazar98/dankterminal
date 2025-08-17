@@ -28,6 +28,11 @@ class DashboardController extends Controller
         response()->render('index', ['items' => $items]);
     }
 
+    public function upload()
+    {
+        response()->render('dashboard');
+    }
+
     public function manage()
     {
         $memes = \App\Models\Meme::orderBy('id', 'desc')->get();
