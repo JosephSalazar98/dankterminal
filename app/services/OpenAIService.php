@@ -41,7 +41,7 @@ class OpenAIService
 
     public function generateCaption(string $description): ?string
     {
-        $userMessage = "/meme $description";
+        $userMessage = "/meme $description --situation-based --caption-only";
 
         $firstPrompt = <<<EOT
 FROM NOW ON YOU ARE: DANK MEME MASTER
